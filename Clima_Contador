@@ -1,0 +1,56 @@
+import telebot
+import requests
+
+sum_valor = 0
+
+bot=telebot.TeleBot("5552659485:AAGUXCEVnjYTfyWTbjoon-s42tlk7I_Ha-U")
+
+@bot.message_handler(commands=['start']) 
+def Start(message):
+  bot.reply_to(message,"Hola, como estas? /Ayuda para ver opciones")
+
+@bot.message_handler(commands=['Ayuda']) 
+def Ayuda (message):
+  bot.send_message(message.chat.id,"Opciones /QuieroSaberElClima /QuieroContar")
+  
+@bot.message_handler(commands=['QuieroContar'])
+def contar(message):
+  global sum_valor 
+  sum_valor = sum_valor + 1
+  bot.reply_to(message,sum_valor)
+  bot.reply_to(message,"Desea Continuar? /si /no")
+
+    
+  @bot.message_handler(commands=['si'])
+  def seguircontando(message):
+    contar(message)
+  @bot.message_handler(commands=['no'])
+  def noseguircontando(message):
+    global sum_valor
+    sum_valor = 0
+    bot.reply_to(message,"Contador terminado")
+    
+
+
+
+@bot.message_handler(commands=['QuieroSaberElClima'])
+def clima(message):
+  bot.send_message(message.chat.id,"Ingresa el nombre de una ciudad")
+  #def clima(message):
+   # bot.reply_to(message,"Ingresa el nombre de una ciudad")
+    
+  @bot.message_handler()
+  def API(message):
+        base_api_url = "https://api.openweathermap.org/data/2.5/weather?q={}&appid={}"
+        api_url = base_api_url.format(message.text, '56125ab8ed49af1546a923958f3dc092')
+        response = requests.get(api_url)
+          # print(formato_respuesta(response.json()))
+        bot.send_message(message.chat.id,formato_respuesta(response.json()))
+      
+  def formato_respuesta(response):
+    return "Ciudad {}\nTemperatura es {} celcios\nLa direccion del viento es {} velocidad del viento {}".format(response["name"],"{:.2f}".format(float(response["main"] ["temp"])/10), response["wind"]["speed"], response["wind"]["speed"])
+
+
+
+bot.infinity_polling()
+   
